@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>词频统计器 · 特朗普交易主义语言分析</title>
+<style>
+  :root {
+    --ink:      #1a1714;
+    --mid:      #4a4540;
+    --light:    #8a837a;
+    --cream:    #f5f0e8;
+    --paper:    #faf7f2;
+    --rule:     #d8d0c4;
+    --red:      #8b1a1a;
+    --red2:     #c4302b;
+    --gold:     #b8860b;
+    --goldp:    #f0e6c0;
+    --teal:     #1a5c52;
+    --tealp:    #d4ece8;
+    --blue:     #1a3a5c;
+    --bluep:    #d4e4f0;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'PingFang SC', 'Noto Sans SC', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    padding: 36px 48px 28px;
+    position: relative; overflow: hidden;
+  }
+  header::after {
+    content: '';
+    position: absolute; bottom: 0; left: 48px; right: 48px;
+    height: 1px; background: rgba(255,255,255,.08);
+  }
+  .hl { font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 10px; font-family: monospace; }
+  header h1 { font-size: clamp(18px,3vw,28px); color: var(--cream);
+    font-weight: 700; line-height: 1.35; margin-bottom: 8px; }
+  header p { font-size: 13px; color: rgba(245,240,232,.55);
+    max-width: 560px; line-height: 1.7; }
+
+  /* ── MAIN ── */
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 36px 32px 80px; }
+
+  /* ── INPUT AREA ── */
+  .input-section {
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 2px; overflow: hidden; margin-bottom: 28px;
+  }
+  .input-head {
+    padding: 14px 20px; border-bottom: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  .input-head-left { display: flex; align-items: center; gap: 10px; }
+  .badge-num {
+    font-family: monospace; font-size: 11px; font-weight: 600;
+    background: var(--red); color: #fff;
+    padding: 2px 8px; border-radius: 1px;
+  }
+  .input-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+  .preset-row { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 20px;
+    border-bottom: 1px solid var(--rule); background: #f2ede4; }
+  .preset-btn {
+    background: none; border: 1px solid var(--rule); border-radius: 2px;
+    font-size: 11px; font-family: monospace; padding: 4px 10px;
+    color: var(--mid); cursor: pointer; transition: all .15s;
+    white-space: nowrap;
+  }
+  .preset-btn:hover { background: var(--goldp); border-color: var(--gold); color: var(--gold); }
+  .preset-btn.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  textarea {
+    width: 100%; min-height: 160px; padding: 16px 20px;
+    border: none; resize: vertical; outline: none;
+    font-size: 13px; line-height: 1.7; color: var(--ink);
+    background: var(--paper); font-family: inherit;
+  }
+  textarea::placeholder { color: var(--light); }
+
+  .input-foot {
+    padding: 12px 20px; border-top: 1px solid var(--rule);
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .char-count { font-family: monospace; font-size: 11px; color: var(--light); }
+
+  .toggle-row { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .toggle-label { font-size: 12px; color: var(--mid); }
+  .toggle-switch {
+    position: relative; width: 36px; height: 20px; cursor: pointer;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; inset: 0; background: var(--rule);
+    border-radius: 10px; transition: .2s;
+  }
+  .slider::before {
+    content: ''; position: absolute;
+    width: 14px; height: 14px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: .2s;
+  }
+  input:checked + .slider { background: var(--red); }
+  input:checked + .slider::before { transform: translateX(16px); }
+
+  .btn-analyze {
+    background: var(--red); color: #fff; border: none;
+    padding: 9px 24px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border-radius: 2px; transition: background .15s;
+    letter-spacing: .03em;
+  }
+  .btn-analyze:hover { background: var(--red2); }
+  .btn-analyze:disabled { background: var(--rule); color: var(--light); cursor: default; }
+
+  /* ── MODE TABS ── */
+  .mode-bar {
+    display: flex; gap: 0; margin-bottom: 24px;
+    border: 1px solid var(--rule); border-radius: 2px; overflow: hidden;
+    background: var(--paper);
+  }
+  .mode-btn {
+    flex: 1; background: none; border: none; border-right: 1px solid var(--rule);
+    padding: 10px 8px; font-size: 12px; color: var(--light);
+    cursor: pointer; transition: all .15s; text-align: center;
+  }
+  .mode-btn:last-child { border-right: none; }
+  .mode-btn:hover { background: var(--goldp); color: var(--gold); }
+  .mode-btn.active { background: var(--ink); color: var(--cream); }
+
+  /* ── RESULTS GRID ── */
+  .results { display: none; }
+  .results.show { display: block; }
+
+  /* ── CLOUD ── */
+  .cloud-wrap {
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 2px; padding: 28px 20px; margin-bottom: 20px;
+    min-height: 260px; display: flex; flex-wrap: wrap;
+    align-items: center; justify-content: center; gap: 10px 14px;
+  }
+  .cloud-word {
+    cursor: pointer; line-height: 1.2; transition: transform .15s, opacity .15s;
+    border-radius: 2px; padding: 2px 5px;
+    display: inline-block;
+  }
+  .cloud-word:hover { transform: scale(1.12); opacity: .85; }
+  .cloud-word.transactional { color: var(--red); }
+  .cloud-word.ally         { color: var(--blue); }
+  .cloud-word.other        { color: var(--mid); }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 2px; overflow: hidden; margin-bottom: 20px;
+  }
+  .table-head {
+    padding: 12px 16px; background: #f0ebe0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 11px; font-family: monospace;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--mid);
+    display: grid; grid-template-columns: 2fr 1fr 1fr 2fr;
+    gap: 8px;
+  }
+  .table-row {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 2fr;
+    gap: 8px; padding: 10px 16px;
+    border-bottom: 1px solid var(--rule);
+    align-items: center; transition: background .1s;
+  }
+  .table-row:last-child { border-bottom: none; }
+  .table-row:hover { background: #f5f0e5; }
+  .table-row .word-cell { font-weight: 600; font-size: 14px; }
+  .table-row .count-cell { font-family: monospace; font-size: 13px; color: var(--mid); }
+  .bar-cell { display: flex; align-items: center; gap: 8px; }
+  .bar-bg { flex: 1; height: 6px; background: var(--rule); border-radius: 3px; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+  .type-tag {
+    font-size: 10px; font-family: monospace; padding: 2px 7px;
+    border-radius: 1px;
+  }
+  .type-tag.T { background: #fae8e8; color: var(--red); }
+  .type-tag.A { background: var(--bluep); color: var(--blue); }
+  .type-tag.O { background: #efefef; color: var(--light); }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 2px; padding: 14px 16px;
+  }
+  .stat-card .sv { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .stat-card .sl { font-size: 11px; color: var(--light); font-family: monospace; }
+  .stat-card.red .sv { color: var(--red); }
+  .stat-card.blue .sv { color: var(--blue); }
+  .stat-card.gold .sv { color: var(--gold); }
+  .stat-card.teal .sv { color: var(--teal); }
+
+  /* ── INSIGHT ── */
+  .insight-box {
+    background: var(--ink); color: var(--cream);
+    border-radius: 2px; padding: 20px 24px; margin-bottom: 20px;
+  }
+  .insight-box h3 {
+    font-size: 13px; font-weight: 600; margin-bottom: 10px;
+    color: var(--gold); font-family: monospace; letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .insight-box p { font-size: 13px; line-height: 1.8; color: rgba(245,240,232,.75); }
+  .insight-box strong { color: var(--gold); }
+
+  /* ── COMPARE ── */
+  .compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-card {
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 2px; overflow: hidden;
+  }
+  .compare-head {
+    padding: 10px 14px; font-size: 12px; font-weight: 600;
+    font-family: monospace;
+  }
+  .compare-head.T { background: #fae8e8; color: var(--red); }
+  .compare-head.A { background: var(--bluep); color: var(--blue); }
+  .compare-list { padding: 10px 14px; }
+  .compare-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; border-bottom: 1px dashed var(--rule); font-size: 13px;
+  }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item .cw { font-weight: 600; }
+  .compare-item .cc { font-family: monospace; font-size: 11px; color: var(--light); }
+
+  /* ── EMPTY / ERROR ── */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--light); font-size: 14px;
+  }
+  .empty-state .ei { font-size: 36px; margin-bottom: 12px; }
+
+  /* ── TOOLTIP ── */
+  .tooltip-box {
+    display: none; position: fixed; z-index: 99;
+    background: var(--ink); color: var(--cream);
+    font-size: 12px; padding: 8px 12px; border-radius: 2px;
+    max-width: 200px; pointer-events: none; line-height: 1.5;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink); color: rgba(245,240,232,.3);
+    font-family: monospace; font-size: 11px;
+    text-align: center; padding: 18px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hl">词频统计器 · 特朗普交易主义语言分析</div>
+  <h1>Trump Transactionalism<br>Language Analyzer</h1>
+  <p>将特朗普涉日韩盟友的公开发言粘贴进来，自动统计高频词、标记交易主义关键词与盟友词汇，生成词云与排行榜。</p>
+</header>
+
+<div class="wrap">
+
+  <!-- 输入区 -->
+  <div class="input-section">
+    <div class="input-head">
+      <div class="input-head-left">
+        <span class="badge-num">INPUT</span>
+        <span class="input-title">粘贴演讲或声明原文</span>
+      </div>
+      <span style="font-size:11px;color:var(--light);font-family:monospace">支持中英文混合文本</span>
+    </div>
+
+    <div class="preset-row">
+      <span style="font-size:11px;color:var(--light);font-family:monospace;align-self:center;margin-right:4px">快速示例：</span>
+      <button class="preset-btn" onclick="loadPreset('s232')">232关税声明 2018.3</button>
+      <button class="preset-btn" onclick="loadPreset('korus')">KORUS发布会 2018.9</button>
+      <button class="preset-btn" onclick="loadPreset('nato')">NATO/驻军费 2018.7</button>
+      <button class="preset-btn" onclick="loadPreset('phase1')">第一阶段协议 2020.1</button>
+    </div>
+
+    <textarea id="mainInput" placeholder="在此粘贴特朗普公开演讲、Truth Social发文、白宫新闻发布会记录等原文…
+
+示例来源：
+• trumpwhitehouse.archives.gov（白宫官方档案）
+• PIIE贸易战时间线中引用的声明文本
+• 新闻发布会文字记录"></textarea>
+
+    <div class="input-foot">
+      <span class="char-count" id="charCount">0 字符</span>
+
+      <div class="toggle-row">
+        <span class="toggle-label">过滤停用词</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="stopToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">仅显示交易/盟友词</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="keyToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">开始分析 →</button>
+    </div>
+  </div>
+
+  <!-- 结果区 -->
+  <div class="results" id="results">
+
+    <!-- 统计摘要 -->
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- 视图切换 -->
+    <div class="mode-bar">
+      <button class="mode-btn active" onclick="switchMode('cloud',this)">☁ 词云视图</button>
+      <button class="mode-btn" onclick="switchMode('table',this)">≡ 排行榜</button>
+      <button class="mode-btn" onclick="switchMode('compare',this)">⇄ 交易词 vs 盟友词</button>
+      <button class="mode-btn" onclick="switchMode('insight',this)">◎ 研究分析</button>
+    </div>
+
+    <!-- 词云 -->
+    <div id="viewCloud">
+      <div class="cloud-wrap" id="cloudContainer"></div>
+      <p style="font-size:11px;color:var(--light);text-align:center;margin-bottom:20px;font-family:monospace">
+        红色 = 交易主义关键词 · 蓝色 = 盟友相关词 · 灰色 = 其他高频词 · 悬停查看释义
+      </p>
+    </div>
+
+    <!-- 排行榜 -->
+    <div id="viewTable" style="display:none">
+      <div class="table-wrap">
+        <div class="table-head">
+          <span>词汇</span><span>出现次数</span><span>类型</span><span>频率</span>
+        </div>
+        <div id="tableBody"></div>
+      </div>
+    </div>
+
+    <!-- 对比 -->
+    <div id="viewCompare" style="display:none">
+      <div class="compare-grid" id="compareGrid"></div>
+    </div>
+
+    <!-- 分析 -->
+    <div id="viewInsight" style="display:none">
+      <div class="insight-box" id="insightBox"></div>
+    </div>
+
+  </div>
+
+  <!-- 空状态 -->
+  <div class="empty-state" id="emptyState">
+    <div class="ei">📋</div>
+    <p>粘贴文本后点击「开始分析」，词云将在这里生成</p>
+  </div>
+
+</div>
+
+<div class="tooltip-box" id="tooltip"></div>
+<footer>词频统计器 · 特朗普交易主义外交研究 · 人工智能与国际关系研究设计 · 2026</footer>
+
+<script>
+// ── 词库定义 ──────────────────────────────────────────
+const TRANSACTIONAL = {
+  // 成本收益类
+  'deal': '交易/协议——核心交易主义词汇',
+  'deals': '交易（复数）',
+  'trade': '贸易',
+  'fair': '公平——常见于"fair trade""not fair"等抱怨框架',
+  'unfair': '不公平——定性盟友/对手占便宜',
+  'reciprocal': '对等/互惠——互惠贸易原则',
+  'reciprocity': '对等原则',
+  'burden': '负担——"burden sharing"驻军费框架',
+  'pay': '付钱/缴费',
+  'paying': '付钱',
+  'paid': '付了钱',
+  'cost': '成本/代价',
+  'costs': '代价',
+  'money': '钱',
+  'billion': '十亿美元——常用于量化盟友"欠债"',
+  'billions': '数十亿美元',
+  'rip': '宰割——"ripping us off"被宰',
+  'ripping': '占便宜/宰',
+  'steal': '偷/窃取（贸易利益）',
+  'stealing': '偷窃',
+  'protect': '保护——安全承诺商品化',
+  'protection': '保护/防御',
+  'military': '军事',
+  'troops': '驻军',
+  'tariff': '关税',
+  'tariffs': '关税（复数）',
+  'tax': '税',
+  'taxes': '税收',
+  'deficit': '贸易赤字',
+  'imbalance': '失衡',
+  'advantage': '优势——他国占优',
+  'win': '赢',
+  'winning': '赢',
+  'lose': '输',
+  'losing': '输',
+  'loser': '输家',
+  'great': '伟大——"make america great again"',
+  'america': '美国',
+  'american': '美国的',
+  'first': '优先——"America First"',
+  'renegotiate': '重谈',
+  'renegotiated': '重谈后',
+  'negotiate': '谈判',
+  'negotiating': '谈判中',
+  'leverage': '筹码',
+  'pressure': '施压',
+  'steel': '钢铁——232条款',
+  'aluminum': '铝——232条款',
+  'section': '条款——232/301条款',
+  'national': '国家——"national security"',
+  'security': '安全',
+  // 中文
+  '公平': '公平——常见于批评盟友"搭便车"',
+  '关税': '关税',
+  '贸易': '贸易',
+  '协议': '协议/协定',
+  '美国': '美国',
+  '优先': '优先——"美国优先"',
+  '负担': '负担',
+  '谈判': '谈判',
+  '赤字': '贸易赤字',
+  '支付': '支付',
+  '保护': '保护',
+  '成本': '成本',
+  '利益': '利益',
+};
+
+const ALLY_WORDS = {
+  'japan': '日本',
+  'japanese': '日本的',
+  'korea': '韩国/朝鲜',
+  'korean': '韩国/朝鲜的',
+  'south': '南（韩）',
+  'north': '北（朝）',
+  'ally': '盟友',
+  'allies': '盟友（复数）',
+  'alliance': '同盟',
+  'nato': '北约',
+  'troops': '驻军',
+  'bases': '军事基地',
+  'base': '基地',
+  'forces': '军队',
+  'korus': 'KORUS自贸协定',
+  'china': '中国',
+  'chinese': '中国的',
+  'beijing': '北京',
+  'sanctions': '制裁',
+  'north korea': '朝鲜',
+  '日本': '日本',
+  '韩国': '韩国',
+  '朝鲜': '朝鲜',
+  '盟友': '盟友',
+  '同盟': '同盟',
+  '中国': '中国',
+  '驻军': '驻军',
+  '联盟': '联盟',
+};
+
+// 英文停用词
+const STOPWORDS = new Set([
+  'the','a','an','and','or','but','in','on','at','to','for','of','with',
+  'is','are','was','were','be','been','being','have','has','had','do','does',
+  'did','will','would','could','should','may','might','shall','can','need',
+  'this','that','these','those','it','its','we','our','you','your','they',
+  'their','he','his','she','her','i','my','me','us','him','her','them',
+  'what','which','who','when','where','how','if','so','as','from','by',
+  'not','no','very','just','also','more','all','about','up','out','there',
+  'than','then','now','here','into','over','after','before','between',
+  'very','really','much','many','some','any','other','new','good','great',
+  'said','says','say','going','going','get','got','getting','make','made',
+  'take','took','come','came','know','knew','think','thought','want','wanted',
+  'see','saw','look','looked','go','went','come','came','time','years','year',
+  'people','way','day','work','own','well','even','back','only','most','such',
+  'mr','mrs','president','thank','thanks','okay','right','going','lot','lot',
+  'things','thing','something','nothing','everything','everyone','someone',
+]);
+
+// 中文停用词
+const STOPWORDS_ZH = new Set([
+  '的','了','在','是','我','有','和','就','不','人','都','一','一个',
+  '上','也','很','到','说','要','去','你','会','着','没有','看','好',
+  '自己','这','那','里','来','对','我们','还','时候','可以','但是',
+  '已经','所以','因为','如果','只有','虽然','而且','然后','可是','之后',
+  '这个','那个','什么','怎么','为什么','他们','她们','他','她','它',
+  '这样','那样','一些','一下','一直','一定','非常','就是','而是',
+  '通过','表示','进行','相关','有关','以及','同时','当然','其中',
+  '目前','这种','那种','需要','希望','认为','已经','包括','方面',
+  '问题','情况','工作','发展','政策','关系','国家',
+]);
+
+// 预设文本
+const PRESETS = {
+  s232: `We have a tremendous trade deficit with many countries. Our trade deficit last year with the world was $800 billion dollars. $800 billion dollars. We're going to fix it. We have to. We can't keep losing our country. We're losing our country on trade. And we're going to protect American workers, American industries. Steel, aluminum — we're going to put tariffs on steel, 25 percent, aluminum, 10 percent. We're going to bring our steel and aluminum industries back. Because of security — national security reasons — we need strong steel and aluminum industries here in America.
+
+Japan has not been fair to us on trade. South Korea — we have a trade deficit with South Korea of $28 billion. We protect them, we defend them, we have 32,000 soldiers on the line. And they don't treat us fairly on trade. We've made bad deals. Terrible deals. But we're fixing it. We're going to have reciprocal trade — if they charge us, we charge them. Simple.`,
+
+  korus: `The United States and South Korea have signed the new KORUS agreement. Under the old deal, South Korea was ripping us off. We had a trade deficit of $28 billion with South Korea. It wasn't fair. It wasn't reciprocal. Now we have a great deal. A fair deal. An America First deal. We protected American auto workers. American steel. We renegotiated and got something good for our people. But we still have our 32,000 troops there. And South Korea should be paying more. Much more. They're a very wealthy country. They can afford it. We're spending billions and billions to protect them.`,
+
+  nato: `NATO nations must meet their financial obligations. Many of them are not paying. They're not paying what they owe. We're supposed to defend them but they don't pay their fair share. Germany pays 1.2 percent of GDP. They're supposed to pay 2 percent. Japan — same thing. South Korea — they should be paying more. It's a burden on American taxpayers. We're paying for the defense of wealthy nations who can afford to pay. And they're ripping us off on trade at the same time. How can that work? It doesn't work. America First means we don't get taken advantage of anymore. If they don't pay, we have to think about whether the relationship works for us.`,
+
+  phase1: `We just signed the biggest deal ever with China. Phase One. It's a great deal for America. They're going to buy $200 billion worth of American goods and services. They're going to buy our agriculture — soybeans, corn, beef. They're going to protect our intellectual property. This is what winning looks like. We put tariffs on China — $370 billion worth. And that's why they came to the table. Pressure. Economic pressure. Tariffs work. Our allies — Japan, South Korea — they should know that America negotiates to win. We don't apologize for putting America First. China signed because of leverage. Tariff leverage.`,
+};
+
+// ── 核心逻辑 ──────────────────────────────────────────
+let lastResult = null;
+
+document.getElementById('mainInput').addEventListener('input', function(){
+  document.getElementById('charCount').textContent = this.value.length + ' 字符';
+});
+
+function loadPreset(key) {
+  document.getElementById('mainInput').value = PRESETS[key];
+  document.getElementById('charCount').textContent = PRESETS[key].length + ' 字符';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function tokenize(text) {
+  // 英文分词
+  const tokens = [];
+  const englishWords = text.toLowerCase().match(/[a-z]+/g) || [];
+  englishWords.forEach(w => tokens.push({ word: w, lang: 'en' }));
+
+  // 中文字符分词（简单：按字，常见双字词优先）
+  const zhMatches = text.match(/[\u4e00-\u9fff]{2,6}/g) || [];
+  zhMatches.forEach(w => tokens.push({ word: w, lang: 'zh' }));
+
+  return tokens;
+}
+
+function classify(word) {
+  const w = word.toLowerCase();
+  if (TRANSACTIONAL[w] || TRANSACTIONAL[word]) return 'T';
+  if (ALLY_WORDS[w] || ALLY_WORDS[word]) return 'A';
+  return 'O';
+}
+
+function isStop(word, lang) {
+  if (lang === 'en') return STOPWORDS.has(word.toLowerCase());
+  return STOPWORDS_ZH.has(word);
+}
+
+function runAnalysis() {
+  const text = document.getElementById('mainInput').value.trim();
+  if (!text) { alert('请先粘贴文本'); return; }
+
+  const filterStop = document.getElementById('stopToggle').checked;
+  const keyOnly = document.getElementById('keyToggle').checked;
+
+  const tokens = tokenize(text);
+  const freq = {};
+
+  tokens.forEach(({ word, lang }) => {
+    if (word.length < 2) return;
+    if (filterStop && isStop(word, lang)) return;
+    const key = lang === 'en' ? word.toLowerCase() : word;
+    freq[key] = (freq[key] || 0) + 1;
+  });
+
+  // 排序
+  let sorted = Object.entries(freq)
+    .map(([word, count]) => ({ word, count, type: classify(word) }))
+    .sort((a, b) => b.count - a.count);
+
+  if (keyOnly) sorted = sorted.filter(d => d.type !== 'O');
+
+  const top = sorted.slice(0, 80);
+  lastResult = { sorted, top, text };
+
+  renderStats(sorted);
+  renderCloud(top);
+  renderTable(top);
+  renderCompare(sorted);
+  renderInsight(sorted, text);
+
+  document.getElementById('results').classList.add('show');
+  document.getElementById('emptyState').style.display = 'none';
+}
+
+function renderStats(sorted) {
+  const total = sorted.reduce((s, d) => s + d.count, 0);
+  const tWords = sorted.filter(d => d.type === 'T');
+  const aWords = sorted.filter(d => d.type === 'A');
+  const tCount = tWords.reduce((s, d) => s + d.count, 0);
+  const aCount = aWords.reduce((s, d) => s + d.count, 0);
+  const ratio = total > 0 ? ((tCount / total) * 100).toFixed(1) : 0;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card red"><div class="sv">${tCount}</div><div class="sl">交易主义词频总计</div></div>
+    <div class="stat-card blue"><div class="sv">${aCount}</div><div class="sl">盟友/国家词频总计</div></div>
+    <div class="stat-card gold"><div class="sv">${ratio}%</div><div class="sl">交易词占总词频比</div></div>
+    <div class="stat-card teal"><div class="sv">${tWords.length}</div><div class="sl">不同交易主义词种数</div></div>
+  `;
+}
+
+function renderCloud(top) {
+  if (!top.length) {
+    document.getElementById('cloudContainer').innerHTML = '<p style="color:var(--light)">未识别到词汇，请检查文本</p>';
+    return;
+  }
+  const maxC = top[0].count;
+  const html = top.map(({ word, count, type }) => {
+    const ratio = count / maxC;
+    const size = Math.round(12 + ratio * 34);
+    const opacity = 0.5 + ratio * 0.5;
+    const cls = type === 'T' ? 'transactional' : type === 'A' ? 'ally' : 'other';
+    const tip = type === 'T' ? (TRANSACTIONAL[word] || TRANSACTIONAL[word.toLowerCase()] || '交易主义词')
+              : type === 'A' ? (ALLY_WORDS[word] || ALLY_WORDS[word.toLowerCase()] || '盟友相关词')
+              : '高频词';
+    return `<span class="cloud-word ${cls}"
+      style="font-size:${size}px;opacity:${opacity};font-weight:${ratio>0.5?700:400}"
+      onmouseenter="showTip(event,'${word}·${count}次·${tip}')"
+      onmouseleave="hideTip()"
+    >${word}</span>`;
+  }).join('');
+  document.getElementById('cloudContainer').innerHTML = html;
+}
+
+function renderTable(top) {
+  const max = top[0]?.count || 1;
+  const colors = { T: 'var(--red)', A: 'var(--blue)', O: 'var(--light)' };
+  document.getElementById('tableBody').innerHTML = top.slice(0, 40).map(({ word, count, type }) => `
+    <div class="table-row">
+      <span class="word-cell" style="color:${colors[type]}">${word}</span>
+      <span class="count-cell">${count}</span>
+      <span><span class="type-tag ${type}">${type === 'T' ? '交易主义' : type === 'A' ? '盟友相关' : '其他'}</span></span>
+      <div class="bar-cell">
+        <div class="bar-bg"><div class="bar-fill" style="width:${(count/max*100).toFixed(1)}%;background:${colors[type]}"></div></div>
+        <span style="font-size:11px;font-family:monospace;color:var(--light)">${(count/max*100).toFixed(0)}%</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCompare(sorted) {
+  const tTop = sorted.filter(d => d.type === 'T').slice(0, 10);
+  const aTop = sorted.filter(d => d.type === 'A').slice(0, 10);
+  const mkList = (arr, cls) => arr.map(({ word, count }) =>
+    `<div class="compare-item"><span class="cw">${word}</span><span class="cc">${count}次</span></div>`
+  ).join('') || '<div style="padding:10px;color:var(--light);font-size:12px">无匹配词汇</div>';
+
+  document.getElementById('compareGrid').innerHTML = `
+    <div class="compare-card">
+      <div class="compare-head T">🔴 交易主义高频词 TOP 10</div>
+      <div class="compare-list">${mkList(tTop, 'T')}</div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-head A">🔵 盟友/国家高频词 TOP 10</div>
+      <div class="compare-list">${mkList(aTop, 'A')}</div>
+    </div>
+  `;
+}
+
+function renderInsight(sorted, text) {
+  const tWords = sorted.filter(d => d.type === 'T');
+  const aWords = sorted.filter(d => d.type === 'A');
+  const total = sorted.reduce((s, d) => s + d.count, 0);
+  const tTotal = tWords.reduce((s, d) => s + d.count, 0);
+  const ratio = total > 0 ? (tTotal / total * 100).toFixed(1) : 0;
+  const topT = tWords.slice(0, 3).map(d => d.word).join('、') || '（无）';
+  const topA = aWords.slice(0, 3).map(d => d.word).join('、') || '（无）';
+
+  const hasDeal = tWords.some(d => d.word === 'deal' || d.word === 'deals');
+  const hasFair = tWords.some(d => ['fair', 'unfair', '公平'].includes(d.word));
+  const hasPay  = tWords.some(d => ['pay','paying','paid','支付','负担'].includes(d.word));
+  const hasKorea = aWords.some(d => ['korea','korean','韩国'].includes(d.word));
+  const hasJapan = aWords.some(d => ['japan','japanese','日本'].includes(d.word));
+
+  const signals = [];
+  if (hasDeal)  signals.push('"deal/deals"高频出现，体现核心交易框架');
+  if (hasFair)  signals.push('"fair/unfair"反复使用，建构"美国吃亏"叙事');
+  if (hasPay)   signals.push('"pay"系列词出现，安全承诺被商品化定价');
+  if (hasKorea) signals.push('文本涉及韩国，可与KORUS谈判节点比对');
+  if (hasJapan) signals.push('文本涉及日本，可与SMA谈判节点比对');
+
+  const signalHtml = signals.length
+    ? signals.map(s => `<li style="margin-bottom:4px">▸ ${s}</li>`).join('')
+    : '<li>未检测到明显交易主义信号，建议换用其他文本</li>';
+
+  document.getElementById('insightBox').innerHTML = `
+    <h3>◎ 自动研究分析</h3>
+    <p>本文本共识别 <strong>${total}</strong> 个有效词次，其中交易主义词汇 <strong>${tTotal}</strong> 次，占比 <strong>${ratio}%</strong>。</p>
+    <p style="margin-top:10px">交易主义高频词：<strong>${topT}</strong><br>盟友/国家高频词：<strong>${topA}</strong></p>
+    <p style="margin-top:12px;color:rgba(245,240,232,.55);font-size:12px">⚠ 研究者注意：词频统计是初步信号，不等于因果解释。"deal"高频出现说明交易框架显著，但需结合语境判断其指向盟友关系还是对华谈判。以下为检测到的研究线索：</p>
+    <ul style="margin-top:10px;padding-left:16px;font-size:12px;color:rgba(245,240,232,.7);line-height:1.8">${signalHtml}</ul>
+  `;
+}
+
+// ── 视图切换 ──────────────────────────────────────────
+function switchMode(mode, btn) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('viewCloud').style.display   = mode === 'cloud'   ? '' : 'none';
+  document.getElementById('viewTable').style.display   = mode === 'table'   ? '' : 'none';
+  document.getElementById('viewCompare').style.display = mode === 'compare' ? '' : 'none';
+  document.getElementById('viewInsight').style.display = mode === 'insight' ? '' : 'none';
+}
+
+// ── Tooltip ───────────────────────────────────────────
+function showTip(e, text) {
+  const t = document.getElementById('tooltip');
+  t.textContent = text; t.style.display = 'block';
+  t.style.left = (e.pageX + 12) + 'px';
+  t.style.top  = (e.pageY - 30) + 'px';
+}
+function hideTip() {
+  document.getElementById('tooltip').style.display = 'none';
+}
+</script>
+</body>
+</html>

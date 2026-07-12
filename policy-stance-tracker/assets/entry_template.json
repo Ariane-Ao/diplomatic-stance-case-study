@@ -1,0 +1,21 @@
+{
+  "date": "YYYY-MM-DD",
+  "actor": "谁说的/谁签署的",
+  "domain": "trade | security | other",
+  "content_paraphrase": "用自己的话转述表态内容，不逐字复制原文超过15个词",
+  "source": {
+    "type": "official_document | speech | joint_statement | media_report | memoir",
+    "citation": "可回溯的出处：文件名/报道标题/官方文件编号",
+    "url": "如有，附链接"
+  },
+  "context": {
+    "occasion": "",
+    "audience": "",
+    "surrounding_events": "",
+    "possible_misreading": ""
+  },
+  "stance_score": 0,
+  "score_rationale": "为什么打这个分，引用content_paraphrase里的哪部分",
+  "verified": false,
+  "verification_note": "人工确认/存疑的说明，未经人工确认前保持 false"
+}

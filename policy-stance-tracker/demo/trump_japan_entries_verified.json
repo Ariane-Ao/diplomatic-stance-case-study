@@ -1,0 +1,87 @@
+[
+  {
+    "date": "2017-01-23",
+    "actor": "特朗普（总统备忘录，签署人）",
+    "domain": "trade",
+    "content_paraphrase": "备忘录指示美国贸易代表撤回TPP签署国身份、永久退出TPP谈判，并尽可能转向双边贸易谈判，理由是要代表美国工人利益、订立公平且有经济利益的贸易协议",
+    "source": {"type": "official_document", "citation": "白宫官方总统备忘录全文（公共领域）", "url": "https://trumpwhitehouse.archives.gov/presidential-actions/presidential-memorandum-regarding-withdrawal-united-states-trans-pacific-partnership-negotiations-agreement/"},
+    "context": {
+      "occasion": "就职后第三天签署的正式总统备忘录",
+      "audience": "直接收文人是美国贸易代表，作为公开政府文件面向公众",
+      "surrounding_events": "日本国会已于1月20日批准TPP",
+      "possible_misreading": "文本未点名日本，容易被简化为纯技术性多边框架调整"
+    },
+    "stance_score": 2,
+    "score_rationale": "按'行动本身可计分'原则给2分：放弃多边框架、转向个案化双边谈判是最大化议价筹码的结构性动作",
+    "verified": true,
+    "verification_note": "人工确认：采纳2分（行动本身构成交易主义强度证据，即便文本未点名日本、未提出具体让步）"
+  },
+  {
+    "date": "2017-02-10",
+    "actor": "特朗普与安倍（联合声明）",
+    "domain": "security",
+    "content_paraphrase": "声明大篇幅重申美日同盟是亚太和平基石、美国对日防卫承诺坚定不移，经济部分只笼统提到未来探讨深化贸易投资关系，未提出具体让步要求",
+    "source": {"type": "joint_statement", "citation": "白宫官方联合声明全文（公共领域）", "url": "https://trumpwhitehouse.archives.gov/briefings-statements/joint-statement-president-donald-j-trump-prime-minister-shinzo-abe/"},
+    "context": {
+      "occasion": "特朗普就职后与安倍的首次正式峰会联合声明",
+      "audience": "两国国内公众及地区盟友",
+      "surrounding_events": "距TPP退出备忘录仅18天",
+      "possible_misreading": "容易被误读为'经济关系被冷处理'，实为体裁差异（外交联合声明本身即倾向合作性辞令）"
+    },
+    "stance_score": 0,
+    "score_rationale": "Agent C数据（交易词占比2.7%全场最低，盟友词52次全场最高）与语境标注高度吻合，同盟基石语言主导，经济议题无具体要求",
+    "verified": true,
+    "verification_note": "人工确认：与条目①之间-2分的跳变判定为体裁差异（内部政策备忘录 vs 外交联合声明）导致的语域切换，非18天内立场实质转变；分值本身0分成立"
+  },
+  {
+    "date": "2018-12-21",
+    "actor": "美国贸易代表办公室（正式谈判目标文件）",
+    "domain": "trade",
+    "content_paraphrase": "文件列出对日689亿美元贸易逆差数字，要求美国工业品全面免关税市场准入、农产品市场开放、汽车行业专项让步，并首次纳入防止汇率操纵的货币条款",
+    "source": {"type": "official_document", "citation": "USTR《美日贸易协定谈判具体目标摘要》2018年12月", "url": "https://ustr.gov/sites/default/files/2018.12.21_Summary_of_U.S.-Japan_Negotiating_Objectives.pdf"},
+    "context": {
+      "occasion": "依2015年贸易促进授权法向国会提交的法定谈判目标文件，经公开征求意见和听证",
+      "audience": "国会与日方谈判代表团，具有程序约束力",
+      "surrounding_events": "2018年9月双方已正式宣布启动美日贸易协定谈判",
+      "possible_misreading": "货币条款容易被清单体文字掩盖分量，实为美日贸易史上罕见的强硬条款"
+    },
+    "stance_score": 2,
+    "score_rationale": "具体让步清单+具体逆差数字，明确符合'要求具体让步'标准",
+    "verified": true,
+    "verification_note": "人工确认：分值依据Agent A对完整14页原文的转述采纳2分，不再要求补跑完整PDF词云交叉验证。与条目②之间+2分的跳变，因2018年9月正式启动双边谈判这一独立程序性事件佐证，判定为真实的立场强化"
+  },
+  {
+    "date": "2019-09-25",
+    "actor": "特朗普与安倍（联合声明+签字仪式讲话）",
+    "domain": "trade",
+    "content_paraphrase": "联合声明确认美日贸易协定及数字贸易协定达成一致，将对部分农产品和工业品削减或取消关税；声明留有'早日解决其他关税相关问题'的措辞，未提及对日汽车关税威胁是否撤销",
+    "source": {"type": "joint_statement", "citation": "白宫联合声明 + 纽约签字仪式讲话逐字稿（均公共领域）", "url": "https://trumpwhitehouse.archives.gov/briefings-statements/joint-statement-united-states-japan-2/"},
+    "context": {
+      "occasion": "联合国大会期间双边签字仪式，正式声明+即兴讲话两种文本",
+      "audience": "两国产业界、国会、国际媒体",
+      "surrounding_events": "声明本身注明协议生效后4个月内还要就服务贸易、投资壁垒继续谈判，是分阶段协议的第一步",
+      "possible_misreading": "签字仪式讲话大量寒暄内容容易被误读为纯友好仪式，实则声明正文留有后续博弈筹码"
+    },
+    "stance_score": 2,
+    "score_rationale": "Agent C数据（交易词占比8.5%，trade命中12次，未出现pay/cost/burden等更锋利词汇）与语境标注一致：具体关税互换但语言克制，2分成立，信源数据完整可靠",
+    "verified": true,
+    "verification_note": "人工确认：分值和信源均无争议，与条目③之间无跳变，不触发疑似转变审计"
+  },
+  {
+    "date": "2019-2020",
+    "actor": "特朗普政府（据博尔顿回忆录披露的谈判要价）",
+    "domain": "security",
+    "content_paraphrase": "根据博尔顿回忆录，特朗普政府曾要求日本将驻日美军费用分摊提高到每年80亿美元；此说法被SCMP在2025年的报道中作为历史背景回顾性引用",
+    "source": {"type": "memoir_secondary", "citation": "SCMP 2025年5月报道回顾性引用博尔顿回忆录；CRS报告RL33436交叉印证数字", "url": "https://www.scmp.com/news/asia/east-asia/article/3308633/japan-must-resolutely-reject-trumps-us-military-cost-demand-ex-minister"},
+    "context": {
+      "occasion": "非公开谈判中的内部要价，无一手官方文件",
+      "audience": "谈判对手方（日方团队），非公开宣示",
+      "surrounding_events": "唯一确认信源是2025年（特朗普第二任期）的回顾性报道，第一任期内未见同期公开报道",
+      "possible_misreading": "容易被误认为第一任期内曾公开讨论，实为回忆录曝光的保密谈判筹码"
+    },
+    "stance_score": 3,
+    "score_rationale": "把安全承诺与具体金额直接挂钩，且要价倍数极高，若成立则符合最高档",
+    "verified": false,
+    "verification_note": "无一手材料可核实，Agent C信源权重判定为最低档，本条维持pending，不纳入本轮正式时间线"
+  }
+]
